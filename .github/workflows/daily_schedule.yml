@@ -1,0 +1,50 @@
+name: Daily Ethereal Upload
+
+on:
+  schedule:
+    # Runs once a day at 12:00 UTC to avoid YouTube rate limits/bans
+    - cron: '0 12 * * *'
+  workflow_dispatch: 
+
+jobs:
+  run_bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360 
+    
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libsndfile1 sox imagemagick fonts-liberation
+          sudo sed -i 's/<policy domain="path" rights="none" pattern="@\*"//' /etc/ImageMagick-6/policy.xml
+
+      - name: Install Python Libraries
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Ethereal Bot
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          YOUTUBE_TOKEN_JSON: ${{ secrets.YOUTUBE_TOKEN_JSON }}
+        run: python main.py
+
+      - name: Commit and Push Memory Bank Updates
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add topics.txt
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: update spiritual topics memory bank [skip ci]"
+          git push
