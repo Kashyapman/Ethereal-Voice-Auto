@@ -1,0 +1,11 @@
+google-genai
+moviepy==1.0.3
+pydub
+Pillow
+numpy
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+requests
+soundfile
+faster-whisper
