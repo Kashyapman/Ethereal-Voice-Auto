@@ -25,10 +25,11 @@ from neural_voice import VoiceEngine
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY") 
 PEXELS_KEY = os.environ.get("PEXELS_API_KEY")
-PIXABAY_API_KEY = os.environ.get("PIXABAY_API_KEY") # NEW: For automated SFX
+PIXABAY_API_KEY = os.environ.get("PIXABAY_API_KEY") # For automated SFX
 YOUTUBE_TOKEN_VAL = os.environ.get("YOUTUBE_TOKEN_JSON")
 CHANNEL_HANDLE = "@EtherealDaily" 
 TOPICS_FILE = "topics.txt"
+SOURCES_FILE = "sources.txt" # Reads from your new books list
 
 # Pillow compatibility for older MoviePy versions
 if not hasattr(PIL.Image, "ANTIALIAS"):
@@ -67,11 +68,17 @@ def generate_viral_script():
     client = genai.Client(api_key=GEMINI_KEY)
     models_to_try = ["models/gemini-2.5-pro", "models/gemini-2.5-flash"]
     
-    content_pool = [
-        "Bhagavad Gita", "Bible (Proverbs/Psalms/Gospels)", "Quran", 
-        "Tao Te Ching", "Dhammapada (Buddhism)", "Meditations (Marcus Aurelius)",
-        "Rumi Poetry", "Stoic Philosophy"
-    ]
+    # Read the books from sources.txt, fallback to default if file is missing
+    if os.path.exists(SOURCES_FILE):
+        with open(SOURCES_FILE, "r", encoding="utf-8") as f:
+            content_pool = [line.strip() for line in f if line.strip()]
+    else:
+        print("⚠️ sources.txt not found! Using default fallback list.")
+        content_pool = [
+            "The Bhagavad Gita", "The Book of Proverbs", "The Quran", 
+            "The Tao Te Ching", "The Dhammapada", "Meditations by Marcus Aurelius"
+        ]
+        
     niche = random.choice(content_pool)
     print(f"🎲 Selected Source for Today: {niche}")
     
@@ -79,41 +86,48 @@ def generate_viral_script():
     avoid_instruction = f"CRITICAL: Do NOT use these exact verses, we have already covered them:\n{past_topics}\n" if past_topics else "No past topics yet."
 
     prompt = f"""
-You are the lead writer for "Ethereal", a YouTube Shorts channel dedicated to universal peace, motivation, and ancient wisdom.
+You are the elite lead scriptwriter for "Ethereal", a massively successful YouTube Shorts channel dedicated to universal peace, daily motivation, and ancient wisdom.
 
-TODAY'S SOURCE: {niche}
+TODAY'S SOURCE MATERIAL: {niche}
 
-Your task is to select one powerful, uplifting verse or quote from this source and write a highly engaging, calming 60-second script.
+Your task is to select one powerful, uplifting verse or quote from this exact source and write a highly engaging, calming 60-second script.
 
 {avoid_instruction}
 
-STRICT STORYTELLING RULES:
-1. THE HOOK: The narrator states the verse calmly.
-2. THE MEANING: Explain the verse in modern, highly relatable terms.
-3. THE MOTIVATION: Apply it to everyday struggles (anxiety, hard work, finding peace).
-4. THE OUTRO: A gentle call to action.
-5. SSML MICRO-DIRECTION: 
-   - Use <prosody rate="slow" pitch="+1st"> for calming lines.
-   - Use <break time="1s"/> after the main quote to let it sink in.
-6. VISUAL KEYWORDS: Use peaceful, beautiful visual keywords (e.g., "slow sunrise over mountains", "calm ocean waves", "sunlight through forest trees").
-7. YOUTUBE SEO:
-   - title: Under 50 chars, uplifting. End with #shorts #motivation.
-   - verse_source: The EXACT book and verse (e.g., "Bhagavad Gita 2:47") so we can log it.
+STRICT STORYTELLING STRUCTURE (Follow exactly):
+1. THE GROUNDING (0-5s): You MUST explicitly state the source of the wisdom in the very first line to build authority. (e.g., "A timeless truth from the Tao Te Ching..." or "Listen to this profound wisdom from the Book of Proverbs...")
+2. THE VERSE (5-15s): State the chosen quote clearly.
+3. THE TRANSLATION (15-30s): Explain what the quote means in plain, highly relatable modern English.
+4. THE APPLICATION (30-50s): Connect this ancient wisdom directly to a modern daily struggle (e.g., healing from a breakup, overcoming work anxiety, feeling lost, finding inner peace). Make the viewer feel understood.
+5. THE BREATH / OUTRO (50-60s): A gentle sign-off (e.g., "Take a deep breath today. Save this reminder, and subscribe for daily peace.")
+
+SSML MICRO-DIRECTION (Crucial for pacing):
+- Use <prosody rate="slow" pitch="-1st"> for warm, calming delivery.
+- You MUST use <break time="1s"/> immediately after reading the ancient verse to let it sink in.
+- Use <break time="800ms"/> before shifting from the "Translation" to the "Application".
+
+VISUALS & SFX:
+- visual_keyword: Use ultra-specific, peaceful visual prompts (e.g., "macro shot of dew on a green leaf", "slow golden hour light through forest", "calm ocean waves crashing slowly").
+- sfx_keyword: Choose subtle sounds from Pixabay (e.g., "wind chime", "soft wind", "singing bowl", "deep breath").
+
+YOUTUBE SEO:
+- title: Under 50 chars, uplifting. End with #shorts #wisdom.
+- verse_source: The EXACT book and verse (e.g., "Tao Te Ching Chapter 8") so we can log it and never repeat it.
 
 Return ONLY valid JSON in this format:
 {{
-  "title": "Find your inner peace today 🌿 #shorts #motivation",
-  "verse_source": "Dhammapada Verse 1",
-  "description": "A gentle reminder for your day. Subscribe for daily wisdom.\\n\\n#motivation #peace #stoicism",
-  "tags": ["motivation", "peace", "shorts", "wisdom", "stoicism", "calm"],
+  "title": "Let go of what you can't control 🌿 #shorts #wisdom",
+  "verse_source": "Epictetus, Enchiridion 1",
+  "description": "Ancient wisdom for modern peace. What are you holding onto today? Let us know below.\\n\\n#wisdom #peace #motivation #stoicism",
+  "tags": ["wisdom", "peace", "shorts", "motivation", "stoicism", "calm", "healing"],
   "recommended_voice_model": "Aoede",
   "lines": [
     {{
-      "style_instruction": "Warm, peaceful, and slow.",
-      "acting_text": "<prosody rate='slow'>We are what we think.</prosody> <break time='1s'/>",
-      "clean_text": "We are what we think.",
-      "visual_keyword": "slow clouds over mountains",
-      "sfx_keyword": "chime"
+      "style_instruction": "Warm, peaceful, and slow. Like a wise mentor.",
+      "acting_text": "<prosody rate='slow'>A timeless truth from the Stoic philosopher Epictetus.</prosody>",
+      "clean_text": "A timeless truth from the Stoic philosopher Epictetus.",
+      "visual_keyword": "slow clouds passing over mountain",
+      "sfx_keyword": "soft wind"
     }}
   ]
 }}
@@ -176,7 +190,6 @@ def add_dynamic_sfx(audio_clip, keyword):
         
     sfx_filename = f"temp_sfx_{keyword.replace(' ', '_')}.mp3"
     
-    # Check if we already downloaded this exact sound during this run to save API calls
     if not os.path.exists(sfx_filename):
         print(f"🔍 Fetching '{keyword}' SFX from Pixabay API...")
         url = "https://pixabay.com/api/audio/"
@@ -189,7 +202,6 @@ def add_dynamic_sfx(audio_clip, keyword):
             r = requests.get(url, params=params)
             data = r.json()
             if data.get("hits") and len(data["hits"]) > 0:
-                # Get the direct mp3 download URL from the API response
                 audio_url = data["hits"][0].get("audio") or data["hits"][0].get("url")
                 
                 if audio_url:
@@ -204,9 +216,8 @@ def add_dynamic_sfx(audio_clip, keyword):
             print(f"⚠️ Pixabay SFX fetch failed for '{keyword}': {e}")
             return audio_clip
 
-    # Apply the downloaded SFX to the voice clip
     try:
-        sfx = AudioFileClip(sfx_filename).volumex(0.12) # Kept soft so it doesn't overpower the voice
+        sfx = AudioFileClip(sfx_filename).volumex(0.12)
         if sfx.duration > audio_clip.duration:
             sfx = sfx.subclip(0, audio_clip.duration)
         return CompositeAudioClip([audio_clip, sfx])
@@ -330,7 +341,6 @@ def main_pipeline():
 
             audio_clip = AudioFileClip(wav_file)
             
-            # Apply the Pixabay dynamically fetched SFX
             audio_clip = add_dynamic_sfx(audio_clip, sfx_keyword)
 
             video_file = f"temp_vid_{i}.mp4"
