@@ -25,6 +25,7 @@ from neural_voice import VoiceEngine
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY") 
 PEXELS_KEY = os.environ.get("PEXELS_API_KEY")
+PIXABAY_API_KEY = os.environ.get("PIXABAY_API_KEY") # NEW: For automated SFX
 YOUTUBE_TOKEN_VAL = os.environ.get("YOUTUBE_TOKEN_JSON")
 CHANNEL_HANDLE = "@EtherealDaily" 
 TOPICS_FILE = "topics.txt"
@@ -33,20 +34,11 @@ TOPICS_FILE = "topics.txt"
 if not hasattr(PIL.Image, "ANTIALIAS"):
     PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
 
-# Peaceful SFX Map
-SFX_MAP = {
-    "chime": "chime.mp3",
-    "bell": "singing_bowl.mp3",
-    "wind": "soft_wind.mp3",
-    "swoosh": "gentle_swoosh.mp3",
-    "nature": "birds.mp3"
-}
-
 # ================== ANTI BAN ================== #
 
 def anti_ban_sleep():
     if os.environ.get("GITHUB_ACTIONS") == "true":
-        sleep_seconds = random.randint(120, 600) # Shorter sleep since it runs once a day
+        sleep_seconds = random.randint(120, 600) 
         print(f"🕵️ Anti-Ban Sleep: {sleep_seconds//60} minutes")
         time.sleep(sleep_seconds)
 
@@ -120,7 +112,8 @@ Return ONLY valid JSON in this format:
       "style_instruction": "Warm, peaceful, and slow.",
       "acting_text": "<prosody rate='slow'>We are what we think.</prosody> <break time='1s'/>",
       "clean_text": "We are what we think.",
-      "visual_keyword": "slow clouds over mountains"
+      "visual_keyword": "slow clouds over mountains",
+      "sfx_keyword": "chime"
     }}
   ]
 }}
@@ -170,29 +163,55 @@ Return ONLY valid JSON in this format:
                 if "lines" in data and len(data["lines"]) > 0:
                     print("✅ Script & SEO generated with OpenRouter Fallback")
                     return data
-            else:
-                print(f"❌ OpenRouter request failed: {r.text}")
         except Exception as e:
             print(f"❌ OpenRouter Fallback error: {e}")
 
     return None
 
-# ================== SFX ================== #
+# ================== DYNAMIC PIXABAY SFX ================== #
 
-def add_sfx(audio_clip, text):
-    text_lower = text.lower()
-    for k, v in SFX_MAP.items():
-        if k in text_lower:
-            path = os.path.join("sfx", v)
-            if os.path.exists(path):
-                try:
-                    sfx = AudioFileClip(path).volumex(0.15) 
-                    if sfx.duration > audio_clip.duration:
-                        sfx = sfx.subclip(0, audio_clip.duration)
-                    return CompositeAudioClip([audio_clip, sfx])
-                except:
-                    pass
-    return audio_clip
+def add_dynamic_sfx(audio_clip, keyword):
+    if not keyword or keyword.lower() in ["none", "null", ""] or not PIXABAY_API_KEY:
+        return audio_clip
+        
+    sfx_filename = f"temp_sfx_{keyword.replace(' ', '_')}.mp3"
+    
+    # Check if we already downloaded this exact sound during this run to save API calls
+    if not os.path.exists(sfx_filename):
+        print(f"🔍 Fetching '{keyword}' SFX from Pixabay API...")
+        url = "https://pixabay.com/api/audio/"
+        params = {
+            "key": PIXABAY_API_KEY,
+            "q": keyword,
+            "audio_type": "sound_effects"
+        }
+        try:
+            r = requests.get(url, params=params)
+            data = r.json()
+            if data.get("hits") and len(data["hits"]) > 0:
+                # Get the direct mp3 download URL from the API response
+                audio_url = data["hits"][0].get("audio") or data["hits"][0].get("url")
+                
+                if audio_url:
+                    r_audio = requests.get(audio_url)
+                    with open(sfx_filename, "wb") as f:
+                        f.write(r_audio.content)
+                else:
+                    return audio_clip
+            else:
+                return audio_clip
+        except Exception as e:
+            print(f"⚠️ Pixabay SFX fetch failed for '{keyword}': {e}")
+            return audio_clip
+
+    # Apply the downloaded SFX to the voice clip
+    try:
+        sfx = AudioFileClip(sfx_filename).volumex(0.12) # Kept soft so it doesn't overpower the voice
+        if sfx.duration > audio_clip.duration:
+            sfx = sfx.subclip(0, audio_clip.duration)
+        return CompositeAudioClip([audio_clip, sfx])
+    except:
+        return audio_clip
 
 # ================== VISUAL FETCH ================== #
 
@@ -297,6 +316,7 @@ def main_pipeline():
             acting_input = line.get("acting_text", line.get("text"))
             style_instruction = line.get("style_instruction", "Warm, peaceful, and slow.")
             clean_text = line.get("clean_text", line.get("text", ""))
+            sfx_keyword = line.get("sfx_keyword", "none")
 
             wav_file = voice_engine.generate_acting_line(
                 acting_text=acting_input, 
@@ -309,16 +329,16 @@ def main_pipeline():
                 continue
 
             audio_clip = AudioFileClip(wav_file)
-            audio_clip = add_sfx(audio_clip, clean_text)
+            
+            # Apply the Pixabay dynamically fetched SFX
+            audio_clip = add_dynamic_sfx(audio_clip, sfx_keyword)
 
             video_file = f"temp_vid_{i}.mp4"
             clip = get_visual_clip(line["visual_keyword"], video_file, audio_clip.duration)
 
-            # Soften the color grading for a more dreamlike look
             clip = clip.fx(colorx, 0.95).set_audio(audio_clip)
 
             if i > 0:
-                # 30% chance for a soft white fade transition between clips
                 if random.random() < 0.3:
                     clip = clip.fadein(0.5, color=[255,255,255]) 
                 else:
@@ -361,7 +381,7 @@ def main_pipeline():
     if music_files:
         chosen_track = random.choice(music_files)
         try:
-            bg_music = AudioFileClip(chosen_track).volumex(0.05) # Keep music very subtle
+            bg_music = AudioFileClip(chosen_track).volumex(0.05)
             bg_music = audio_loop(bg_music, duration=final_video.duration)
             final_audio = CompositeAudioClip([final_video.audio, bg_music])
             final_video = final_video.set_audio(final_audio)
@@ -396,7 +416,7 @@ def upload_to_youtube(file_path, metadata):
                     "title": metadata["title"],
                     "description": metadata["description"],
                     "tags": metadata["tags"],
-                    "categoryId": "22" # Changed from 24 (Entertainment) to 22 (People & Blogs)
+                    "categoryId": "22" 
                 },
                 "status": {
                     "privacyStatus": "public",
@@ -418,9 +438,11 @@ def cleanup_files(final_video):
     try:
         if final_video and os.path.exists(final_video):
             os.remove(final_video)
-            print(f"Deleted {final_video}")
 
         for f in glob.glob("temp_vid_*.mp4"):
+            os.remove(f)
+            
+        for f in glob.glob("temp_sfx_*.mp3"):
             os.remove(f)
             
         for f in glob.glob("temp_*.wav"):
@@ -439,7 +461,6 @@ if __name__ == "__main__":
         upload_success = upload_to_youtube(video_path, metadata)
         
         if upload_success:
-            # Safely get the verse_source, fallback to title
             case_to_save = metadata.get('verse_source', metadata['title'])
             save_new_topic(case_to_save)
         
