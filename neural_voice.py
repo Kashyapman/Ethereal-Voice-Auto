@@ -4,7 +4,7 @@ import time
 from google import genai
 from google.genai import types
 from pydub import AudioSegment
-from pydub.effects import normalize
+from pydub.effects import compress_dynamic_range, normalize
 
 class VoiceEngine:
     def __init__(self):
@@ -14,10 +14,11 @@ class VoiceEngine:
             raise ValueError("GEMINI_API_KEY environment variable not set.")
         self.client = genai.Client(api_key=self.api_key)
 
-    def _podcast_mastering(self, sound):
-        """Clean, warm, and resonant mastering for spiritual content."""
-        # Removed the low_pass_filter to keep the voice crisp and airy
-        sound = normalize(sound, headroom=0.5) 
+    def _ethereal_mastering(self, sound):
+        """Clean, warm, massive, and resonant mastering for godly spiritual content."""
+        # Added compression to give the voice a booming, cinematic, omnipresent weight
+        sound = compress_dynamic_range(sound, threshold=-15.0, ratio=4.0, attack=5.0, release=50.0)
+        sound = normalize(sound, headroom=0.2) 
         
         # Add a 600ms peaceful pause buffer so the listener can absorb the words
         silence = AudioSegment.silent(duration=600)
@@ -25,7 +26,7 @@ class VoiceEngine:
         
         return sound
 
-    def generate_acting_line(self, acting_text, style_instruction, index, voice_name="Aoede"):
+    def generate_acting_line(self, acting_text, style_instruction, index, voice_name="Charon"):
         filename = f"temp_voice_{index}.wav"
         print(f"🎙️ Rendering [{voice_name}] | Vibe: {style_instruction}")
 
@@ -38,13 +39,13 @@ class VoiceEngine:
             )
         )
 
-        prompt = f"""You are a calm, enlightened, and uplifting narrator. 
+        prompt = f"""You are a celestial, omnipresent narrator delivering ancient wisdom. 
 
-YOUR VOCAL STYLE/EMOTION: 
+YOUR VOCAL STYLE/EMOTION FOR THIS LINE: 
 "{style_instruction}"
 
 CRITICAL INSTRUCTIONS:
-Process the following SSML markup. Speak slowly, clearly, and with deep empathy. Pay strict attention to <break> tags to let the wisdom breathe.
+Process the following SSML markup exactly. Speak with absolute celestial authority, infinite peace, and deep resonance.
 
 <speak>
 {acting_text}
@@ -76,13 +77,17 @@ Process the following SSML markup. Speak slowly, clearly, and with deep empathy.
                         wf.writeframes(audio_bytes)
 
                     sound = AudioSegment.from_file(temp_raw)
-                    sound = self._podcast_mastering(sound)
+                    sound = self._ethereal_mastering(sound)
                     sound.export(filename, format="wav")
-                    if os.path.exists(temp_raw): os.remove(temp_raw)
+                    
+                    if os.path.exists(temp_raw): 
+                        os.remove(temp_raw)
 
                     return filename
 
                 except Exception as e:
-                    if "429" in str(e) or "503" in str(e): time.sleep(35 + (attempt * 10))
-                    else: break 
+                    if "429" in str(e) or "503" in str(e): 
+                        time.sleep(35 + (attempt * 10))
+                    else: 
+                        break 
         return None
