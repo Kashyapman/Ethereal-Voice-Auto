@@ -25,7 +25,7 @@ from neural_voice import VoiceEngine
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY") 
 PEXELS_KEY = os.environ.get("PEXELS_API_KEY")
-PIXABAY_API_KEY = os.environ.get("PIXABAY_API_KEY") # For automated SFX
+PIXABAY_API_KEY = os.environ.get("PIXABAY_API_KEY") # NEW: For automated SFX
 YOUTUBE_TOKEN_VAL = os.environ.get("YOUTUBE_TOKEN_JSON")
 CHANNEL_HANDLE = "@EtherealDaily" 
 TOPICS_FILE = "topics.txt"
@@ -86,7 +86,7 @@ def generate_viral_script():
     avoid_instruction = f"CRITICAL: Do NOT use these exact verses, we have already covered them:\n{past_topics}\n" if past_topics else "No past topics yet."
 
     prompt = f"""
-You are the elite lead scriptwriter for "Ethereal", a massively successful YouTube Shorts channel dedicated to universal peace, daily motivation, and ancient wisdom.
+You are the elite lead scriptwriter and Master Voice Director for "Ethereal", a massively successful YouTube Shorts channel dedicated to universal peace and ancient wisdom.
 
 TODAY'S SOURCE MATERIAL: {niche}
 
@@ -94,17 +94,18 @@ Your task is to select one powerful, uplifting verse or quote from this exact so
 
 {avoid_instruction}
 
-STRICT STORYTELLING STRUCTURE (Follow exactly):
-1. THE GROUNDING (0-5s): You MUST explicitly state the source of the wisdom in the very first line to build authority. (e.g., "A timeless truth from the Tao Te Ching..." or "Listen to this profound wisdom from the Book of Proverbs...")
+STRICT STORYTELLING STRUCTURE:
+1. THE GROUNDING (0-5s): Explicitly state the source of the wisdom in the very first line to build authority.
 2. THE VERSE (5-15s): State the chosen quote clearly.
 3. THE TRANSLATION (15-30s): Explain what the quote means in plain, highly relatable modern English.
-4. THE APPLICATION (30-50s): Connect this ancient wisdom directly to a modern daily struggle (e.g., healing from a breakup, overcoming work anxiety, feeling lost, finding inner peace). Make the viewer feel understood.
+4. THE APPLICATION (30-50s): Connect this ancient wisdom directly to a modern daily struggle.
 5. THE BREATH / OUTRO (50-60s): A gentle sign-off (e.g., "Take a deep breath today. Save this reminder, and subscribe for daily peace.")
 
-SSML MICRO-DIRECTION (Crucial for pacing):
-- Use <prosody rate="slow" pitch="-1st"> for warm, calming delivery.
-- You MUST use <break time="1s"/> immediately after reading the ancient verse to let it sink in.
-- Use <break time="800ms"/> before shifting from the "Translation" to the "Application".
+VOICE ACTING & SSML DIRECTION (CRITICAL FOR GODLY TONE):
+- recommended_voice_model: Choose either "Charon" (for a deep, ancient, resonant male voice) or "Aoede" (for a rich, ethereal, omnipresent female voice).
+- style_instruction: You MUST use this exact instruction: "Omnipresent, infinitely wise, and deeply resonant. Speak with absolute celestial authority, yet boundless love and peace, as if speaking directly to the viewer's soul."
+- SSML: You MUST wrap the acting_text in <prosody rate="x-slow" pitch="-2st"> to artificially deepen and expand the scale of the voice so it sounds massive and godly.
+- Use <break time="1s"/> after the main quote.
 
 VISUALS & SFX:
 - visual_keyword: Use ultra-specific, peaceful visual prompts (e.g., "macro shot of dew on a green leaf", "slow golden hour light through forest", "calm ocean waves crashing slowly").
@@ -118,13 +119,13 @@ Return ONLY valid JSON in this format:
 {{
   "title": "Let go of what you can't control 🌿 #shorts #wisdom",
   "verse_source": "Epictetus, Enchiridion 1",
-  "description": "Ancient wisdom for modern peace. What are you holding onto today? Let us know below.\\n\\n#wisdom #peace #motivation #stoicism",
+  "description": "Ancient wisdom for modern peace.\\n\\n#wisdom #peace #motivation #stoicism",
   "tags": ["wisdom", "peace", "shorts", "motivation", "stoicism", "calm", "healing"],
-  "recommended_voice_model": "Aoede",
+  "recommended_voice_model": "Charon",
   "lines": [
     {{
-      "style_instruction": "Warm, peaceful, and slow. Like a wise mentor.",
-      "acting_text": "<prosody rate='slow'>A timeless truth from the Stoic philosopher Epictetus.</prosody>",
+      "style_instruction": "Omnipresent, infinitely wise, and deeply resonant. Speak with absolute celestial authority, yet boundless love and peace, as if speaking directly to the viewer's soul.",
+      "acting_text": "<prosody rate='x-slow' pitch='-2st'>A timeless truth from the Stoic philosopher Epictetus.</prosody>",
       "clean_text": "A timeless truth from the Stoic philosopher Epictetus.",
       "visual_keyword": "slow clouds passing over mountain",
       "sfx_keyword": "soft wind"
@@ -217,7 +218,7 @@ def add_dynamic_sfx(audio_clip, keyword):
             return audio_clip
 
     try:
-        sfx = AudioFileClip(sfx_filename).volumex(0.12)
+        sfx = AudioFileClip(sfx_filename).volumex(0.12) 
         if sfx.duration > audio_clip.duration:
             sfx = sfx.subclip(0, audio_clip.duration)
         return CompositeAudioClip([audio_clip, sfx])
@@ -317,7 +318,7 @@ def main_pipeline():
     print(f"📁 Verse Logged: {script.get('verse_source', 'Unknown Source')}")
     print(f"🏷️ Tags: {', '.join(script['tags'][:5])}...")
     
-    target_voice = script.get("recommended_voice_model", "Aoede")
+    target_voice = script.get("recommended_voice_model", "Charon")
     print(f"🎙️ AI Casted Narrator: {target_voice}")
     
     final_clips = []
