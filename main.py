@@ -86,30 +86,30 @@ def generate_viral_script():
     avoid_instruction = f"CRITICAL: Do NOT use these exact verses, we have already covered them:\n{past_topics}\n" if past_topics else "No past topics yet."
 
     prompt = f"""
-You are the elite lead scriptwriter and Master Voice Director for "Ethereal", a massively successful YouTube Shorts channel dedicated to universal peace and ancient wisdom.
+You are the elite lead scriptwriter and Master Voice Director for "Ethereal", a massively successful YouTube Shorts channel. 
 
 TODAY'S SOURCE MATERIAL: {niche}
 
-Your task is to select one powerful, uplifting verse or quote from this exact source and write a highly engaging, calming 60-second script.
+Your task is to select one powerful, uplifting verse or quote from this exact source and write a highly engaging, high-retention 50-second script optimized for the YouTube Shorts algorithm.
 
 {avoid_instruction}
 
-STRICT STORYTELLING STRUCTURE:
-1. THE GROUNDING (0-5s): Explicitly state the source of the wisdom in the very first line to build authority.
-2. THE VERSE (5-15s): State the chosen quote clearly.
-3. THE TRANSLATION (15-30s): Explain what the quote means in plain, highly relatable modern English.
-4. THE APPLICATION (30-50s): Connect this ancient wisdom directly to a modern daily struggle.
-5. THE BREATH / OUTRO (50-60s): A gentle sign-off (e.g., "Take a deep breath today. Save this reminder, and subscribe for daily peace.")
+STRICT HIGH-RETENTION STORYTELLING STRUCTURE:
+1. THE SCROLL HOOK (0-4s): You MUST start exactly like this to hook the viewer: "From the ancient scrolls of [Source], a profound wisdom for your soul. It reminds us..." 
+2. THE VERSE (4-12s): State the chosen quote clearly.
+3. THE PIVOT TRANSLATION (12-25s): You MUST start the explanation exactly like this: "This isn't about [common misconception/literal translation], but about [the deep, relatable meaning]..." 
+4. THE APPLICATION (25-45s): Connect this directly to a modern struggle (anxiety, burnout, feeling lost, pressure to succeed). Keep sentences punchy and continuous.
+5. THE BREATH / OUTRO (45-50s): End with: "Take a deep breath. Trust the path. Save this reminder and subscribe for daily peace."
 
-VOICE ACTING & SSML DIRECTION (CRITICAL FOR GODLY TONE):
-- recommended_voice_model: Choose either "Charon" (for a deep, ancient, resonant male voice) or "Aoede" (for a rich, ethereal, omnipresent female voice).
-- style_instruction: You MUST use this exact instruction: "Omnipresent, infinitely wise, and deeply resonant. Speak with absolute celestial authority, yet boundless love and peace, as if speaking directly to the viewer's soul."
-- SSML: You MUST wrap the acting_text in <prosody rate="x-slow" pitch="-2st"> to artificially deepen and expand the scale of the voice so it sounds massive and godly.
-- Use <break time="1s"/> after the main quote.
+VOICE ACTING & SSML DIRECTION (CRITICAL FOR SHORTS ALGORITHM):
+- recommended_voice_model: Choose "Charon" (male) or "Aoede" (female).
+- style_instruction: "Captivating, wise, and profoundly comforting. Speak with momentum and clarity. DO NOT drag words out. Keep the listener completely hooked."
+- SSML PACING: Shorts viewers have zero patience. You MUST use <prosody rate='medium' pitch='-1st'>. This keeps the voice deep and godly, but moving fast enough to prevent viewers from swiping away.
+- NO LONG PAUSES: Do NOT use 1-second breaks. The maximum break allowed is <break time='400ms'/> after the main verse.
 
 VISUALS & SFX:
 - visual_keyword: Use ultra-specific, peaceful visual prompts (e.g., "macro shot of dew on a green leaf", "slow golden hour light through forest", "calm ocean waves crashing slowly").
-- sfx_keyword: Choose subtle sounds from Pixabay (e.g., "wind chime", "soft wind", "singing bowl", "deep breath").
+- sfx_keyword: Choose subtle sounds from Pixabay (e.g., "wind chime", "soft wind", "singing bowl").
 
 YOUTUBE SEO:
 - title: Under 50 chars, uplifting. End with #shorts #wisdom.
@@ -117,16 +117,16 @@ YOUTUBE SEO:
 
 Return ONLY valid JSON in this format:
 {{
-  "title": "Let go of what you can't control 🌿 #shorts #wisdom",
-  "verse_source": "Epictetus, Enchiridion 1",
+  "title": "Trust a higher path 🌿 #shorts #wisdom",
+  "verse_source": "Proverbs 3:5",
   "description": "Ancient wisdom for modern peace.\\n\\n#wisdom #peace #motivation #stoicism",
   "tags": ["wisdom", "peace", "shorts", "motivation", "stoicism", "calm", "healing"],
   "recommended_voice_model": "Charon",
   "lines": [
     {{
-      "style_instruction": "Omnipresent, infinitely wise, and deeply resonant. Speak with absolute celestial authority, yet boundless love and peace, as if speaking directly to the viewer's soul.",
-      "acting_text": "<prosody rate='x-slow' pitch='-2st'>A timeless truth from the Stoic philosopher Epictetus.</prosody>",
-      "clean_text": "A timeless truth from the Stoic philosopher Epictetus.",
+      "style_instruction": "Captivating, wise, and profoundly comforting. Speak with momentum and clarity.",
+      "acting_text": "<prosody rate='medium' pitch='-1st'>From the ancient scrolls of Proverbs, a profound wisdom for your soul. It reminds us...</prosody>",
+      "clean_text": "From the ancient scrolls of Proverbs, a profound wisdom for your soul. It reminds us...",
       "visual_keyword": "slow clouds passing over mountain",
       "sfx_keyword": "soft wind"
     }}
