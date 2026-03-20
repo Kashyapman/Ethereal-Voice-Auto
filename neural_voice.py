@@ -15,13 +15,13 @@ class VoiceEngine:
         self.client = genai.Client(api_key=self.api_key)
 
     def _ethereal_mastering(self, sound):
-        """Clean, warm, massive, and resonant mastering for godly spiritual content."""
-        # Added compression to give the voice a booming, cinematic, omnipresent weight
+        """Clean, warm, massive mastering—but optimized for Shorts retention."""
         sound = compress_dynamic_range(sound, threshold=-15.0, ratio=4.0, attack=5.0, release=50.0)
         sound = normalize(sound, headroom=0.2) 
         
-        # Add a 600ms peaceful pause buffer so the listener can absorb the words
-        silence = AudioSegment.silent(duration=600)
+        # FIXED: Reduced pause from 600ms to 150ms to keep the Shorts algorithm happy. 
+        # No dead air! Keep the viewer hooked.
+        silence = AudioSegment.silent(duration=150)
         sound = sound + silence
         
         return sound
@@ -39,13 +39,13 @@ class VoiceEngine:
             )
         )
 
-        prompt = f"""You are a celestial, omnipresent narrator delivering ancient wisdom. 
+        prompt = f"""You are a captivating, celestial narrator delivering ancient wisdom. 
 
 YOUR VOCAL STYLE/EMOTION FOR THIS LINE: 
 "{style_instruction}"
 
 CRITICAL INSTRUCTIONS:
-Process the following SSML markup exactly. Speak with absolute celestial authority, infinite peace, and deep resonance.
+Process the following SSML markup exactly. Speak with deep resonance, but maintain strong MOMENTUM. Do not drag your words. This is for short-form video, so pacing must be engaging and continuous to maintain viewer retention.
 
 <speak>
 {acting_text}
