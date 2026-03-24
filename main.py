@@ -89,20 +89,20 @@ You are the elite lead scriptwriter and Master Voice Director for "Ethereal", a 
 
 TODAY'S SOURCE MATERIAL: {niche}
 
-Your task is to select one powerful, uplifting verse or quote from this exact source and write an ULTRA-CONCISE, high-retention script optimized for the YouTube Shorts algorithm.
+Your task is to select one powerful, uplifting verse or quote from this exact source and write a highly engaging, high-retention script optimized for the YouTube Shorts algorithm.
 
 {avoid_instruction}
 
-STRICT HIGH-RETENTION STORYTELLING STRUCTURE (CRITICAL: MAX 60 WORDS TOTAL):
-1. THE PAIN POINT HOOK (Max 10 words): Start IMMEDIATELY with a sharp, relatable modern problem (e.g. "Feeling crushed by the weight of others' opinions?", "Constantly worrying about tomorrow?"). Say fewer words with massive impact. Get straight to the point within the first 1 second.
-2. THE VERSE (Max 15 words): Introduce and read a short proverb or phrase from the holy text. (e.g., "The [Source] reminds us: [Quote]").
-3. THE CONCISE EXPLANATION (Max 25 words): Explain the core concept quickly. Say words to the point while ensuring you hit the meaning hard. Make the viewer say "wow." Max 2 short sentences.
-4. THE INVISIBLE LOOP (Max 10 words): You MUST end the script with a connective phrase like "And so...", "Which is why...", or "And that is exactly why..." so it grammatically flows PERFECTLY back into the very first line of your Pain Point hook, creating an endless seamless loop. Do NOT say "subscribe", "save this video", or do a traditional outro.
+STRICT HIGH-RETENTION STORYTELLING STRUCTURE:
+1. THE PAIN POINT HOOK: Start IMMEDIATELY with a sharp, relatable modern problem (e.g. "Feeling crushed by the weight of others' opinions?", "Constantly worrying about tomorrow?"). Get straight to the point.
+2. THE SOURCE & THE VERSE: You MUST explicitly state the source and read the actual quote. (e.g., "The ancient wisdom of the Tao Te Ching reminds us: [Quote]"). Do not skip the quote or the source!
+3. THE PROPER EXPLANATION: Provide a deep, insightful explanation of what the verse means and how it applies to the pain point mentioned in the hook. Make the viewer understand and feel the impact.
+4. THE INVISIBLE LOOP: End the script with a connective phrase like "And so...", "Which is why...", or "And that is exactly why..." so it grammatically flows PERFECTLY back into the very first line of your Pain Point hook, creating an endless seamless loop. Do NOT say "subscribe", "save this video", or do a traditional outro.
 
-VOICE ACTING & SSML DIRECTION:
+VOICE ACTING & SSML DIRECTION (CRITICAL FOR SHORTS ALGORITHM):
 - recommended_voice_model: Choose "Charon" (male) or "Aoede" (female).
 - style_instruction: "Captivating, wise, and profoundly comforting. Speak with momentum and clarity. DO NOT drag words out."
-- SSML PACING: You MUST use <prosody rate='medium' pitch='-1st'>. This keeps the voice deep, but moving fast enough to prevent viewers from swiping away. To keep the video short, we rely on your strictly low word count, not fast talking.
+- SSML PACING: You MUST use <prosody rate='medium' pitch='-1st'>. This keeps the voice deep and godly, but moving fast enough to prevent viewers from swiping away.
 - NO LONG PAUSES: Do NOT use 1-second breaks. The maximum break allowed is <break time='400ms'/> after the main verse.
 
 VISUALS & SFX:
@@ -137,8 +137,8 @@ Return ONLY valid JSON in this format:
     }},
     {{
       "style_instruction": "Comforting and impactful, slightly faster pace.",
-      "acting_text": "<prosody rate='medium' pitch='-1st'>Your anxiety comes from carrying the weight of the entire world. Release what isn't yours to carry. And so...</prosody>",
-      "clean_text": "Your anxiety comes from carrying the weight of the entire world. Release what isn't yours to carry. And so...",
+      "acting_text": "<prosody rate='medium' pitch='-1st'>Your anxiety comes from carrying the weight of the entire world, instead of focusing on your own actions. When you let go of what isn't yours to carry, you find true freedom. And that is exactly why you might be...</prosody>",
+      "clean_text": "Your anxiety comes from carrying the weight of the entire world, instead of focusing on your own actions. When you let go of what isn't yours to carry, you find true freedom. And that is exactly why you might be...",
       "visual_keyword": "sunlight breaking through dark clouds",
       "sfx_keyword": "wind chime"
     }}
