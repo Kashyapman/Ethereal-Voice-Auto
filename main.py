@@ -25,11 +25,11 @@ from neural_voice import VoiceEngine
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY") 
 PEXELS_KEY = os.environ.get("PEXELS_API_KEY")
-PIXABAY_API_KEY = os.environ.get("PIXABAY_API_KEY") # NEW: For automated SFX
+PIXABAY_API_KEY = os.environ.get("PIXABAY_API_KEY") 
 YOUTUBE_TOKEN_VAL = os.environ.get("YOUTUBE_TOKEN_JSON")
 CHANNEL_HANDLE = "@EtherealDaily" 
 TOPICS_FILE = "topics.txt"
-SOURCES_FILE = "sources.txt" # Reads from your new books list
+SOURCES_FILE = "sources.txt" 
 
 # Pillow compatibility for older MoviePy versions
 if not hasattr(PIL.Image, "ANTIALIAS"):
@@ -63,12 +63,11 @@ def save_new_topic(case_name):
 # ================== SCRIPT & SEO GENERATION ================== #
 
 def generate_viral_script():
-    print("🧠 Generating Ethereal Script & SEO Metadata...")
+    print("🧠 Generating Ethereal High-Retention Loop Script...")
 
     client = genai.Client(api_key=GEMINI_KEY)
     models_to_try = ["models/gemini-2.5-pro", "models/gemini-2.5-flash"]
     
-    # Read the books from sources.txt, fallback to default if file is missing
     if os.path.exists(SOURCES_FILE):
         with open(SOURCES_FILE, "r", encoding="utf-8") as f:
             content_pool = [line.strip() for line in f if line.strip()]
@@ -90,21 +89,20 @@ You are the elite lead scriptwriter and Master Voice Director for "Ethereal", a 
 
 TODAY'S SOURCE MATERIAL: {niche}
 
-Your task is to select one powerful, uplifting verse or quote from this exact source and write a highly engaging, high-retention 50-second script optimized for the YouTube Shorts algorithm.
+Your task is to select one powerful, uplifting verse or quote from this exact source and write an ULTRA-CONCISE, high-retention script optimized for the YouTube Shorts algorithm.
 
 {avoid_instruction}
 
-STRICT HIGH-RETENTION STORYTELLING STRUCTURE:
-1. THE SCROLL HOOK (0-4s): You MUST start exactly like this to hook the viewer: "From the ancient scrolls of [Source], a profound wisdom for your soul. It reminds us..." 
-2. THE VERSE (4-12s): State the chosen quote clearly.
-3. THE PIVOT TRANSLATION (12-25s): You MUST start the explanation exactly like this: "This isn't about [common misconception/literal translation], but about [the deep, relatable meaning]..." 
-4. THE APPLICATION (25-45s): Connect this directly to a modern struggle (anxiety, burnout, feeling lost, pressure to succeed). Keep sentences punchy and continuous.
-5. THE BREATH / OUTRO (45-50s): End with: "Take a deep breath. Trust the path. Save this reminder and subscribe for daily peace."
+STRICT HIGH-RETENTION STORYTELLING STRUCTURE (CRITICAL: MAX 60 WORDS TOTAL):
+1. THE PAIN POINT HOOK (Max 10 words): Start IMMEDIATELY with a sharp, relatable modern problem (e.g. "Feeling crushed by the weight of others' opinions?", "Constantly worrying about tomorrow?"). Say fewer words with massive impact. Get straight to the point within the first 1 second.
+2. THE VERSE (Max 15 words): Introduce and read a short proverb or phrase from the holy text. (e.g., "The [Source] reminds us: [Quote]").
+3. THE CONCISE EXPLANATION (Max 25 words): Explain the core concept quickly. Say words to the point while ensuring you hit the meaning hard. Make the viewer say "wow." Max 2 short sentences.
+4. THE INVISIBLE LOOP (Max 10 words): You MUST end the script with a connective phrase like "And so...", "Which is why...", or "And that is exactly why..." so it grammatically flows PERFECTLY back into the very first line of your Pain Point hook, creating an endless seamless loop. Do NOT say "subscribe", "save this video", or do a traditional outro.
 
-VOICE ACTING & SSML DIRECTION (CRITICAL FOR SHORTS ALGORITHM):
+VOICE ACTING & SSML DIRECTION:
 - recommended_voice_model: Choose "Charon" (male) or "Aoede" (female).
-- style_instruction: "Captivating, wise, and profoundly comforting. Speak with momentum and clarity. DO NOT drag words out. Keep the listener completely hooked."
-- SSML PACING: Shorts viewers have zero patience. You MUST use <prosody rate='medium' pitch='-1st'>. This keeps the voice deep and godly, but moving fast enough to prevent viewers from swiping away.
+- style_instruction: "Captivating, wise, and profoundly comforting. Speak with momentum and clarity. DO NOT drag words out."
+- SSML PACING: You MUST use <prosody rate='medium' pitch='-1st'>. This keeps the voice deep, but moving fast enough to prevent viewers from swiping away. To keep the video short, we rely on your strictly low word count, not fast talking.
 - NO LONG PAUSES: Do NOT use 1-second breaks. The maximum break allowed is <break time='400ms'/> after the main verse.
 
 VISUALS & SFX:
@@ -117,18 +115,32 @@ YOUTUBE SEO:
 
 Return ONLY valid JSON in this format:
 {{
-  "title": "Trust a higher path 🌿 #shorts #wisdom",
-  "verse_source": "Proverbs 3:5",
+  "title": "Let go of what you can't control 🌿 #shorts #wisdom",
+  "verse_source": "Epictetus, Enchiridion 1",
   "description": "Ancient wisdom for modern peace.\\n\\n#wisdom #peace #motivation #stoicism",
   "tags": ["wisdom", "peace", "shorts", "motivation", "stoicism", "calm", "healing"],
   "recommended_voice_model": "Charon",
   "lines": [
     {{
       "style_instruction": "Captivating, wise, and profoundly comforting. Speak with momentum and clarity.",
-      "acting_text": "<prosody rate='medium' pitch='-1st'>From the ancient scrolls of Proverbs, a profound wisdom for your soul. It reminds us...</prosody>",
-      "clean_text": "From the ancient scrolls of Proverbs, a profound wisdom for your soul. It reminds us...",
+      "acting_text": "<prosody rate='medium' pitch='-1st'>Feeling crushed by things you cannot control? The Stoic philosopher Epictetus reminds us...</prosody>",
+      "clean_text": "Feeling crushed by things you cannot control? The Stoic philosopher Epictetus reminds us...",
       "visual_keyword": "slow clouds passing over mountain",
       "sfx_keyword": "soft wind"
+    }},
+    {{
+      "style_instruction": "Deep resonance, authoritative.",
+      "acting_text": "<prosody rate='medium' pitch='-1st'>'Some things are in our control and others not.'</prosody> <break time='400ms'/>",
+      "clean_text": "'Some things are in our control and others not.'",
+      "visual_keyword": "calm ocean waves crashing slowly",
+      "sfx_keyword": "singing bowl"
+    }},
+    {{
+      "style_instruction": "Comforting and impactful, slightly faster pace.",
+      "acting_text": "<prosody rate='medium' pitch='-1st'>Your anxiety comes from carrying the weight of the entire world. Release what isn't yours to carry. And so...</prosody>",
+      "clean_text": "Your anxiety comes from carrying the weight of the entire world. Release what isn't yours to carry. And so...",
+      "visual_keyword": "sunlight breaking through dark clouds",
+      "sfx_keyword": "wind chime"
     }}
   ]
 }}
