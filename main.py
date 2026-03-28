@@ -99,11 +99,13 @@ STRICT HIGH-RETENTION STORYTELLING STRUCTURE:
 3. THE PROPER EXPLANATION: Provide a deep, insightful explanation of what the verse means and how it applies to the pain point mentioned in the hook. Make the viewer understand and feel the impact.
 4. THE INVISIBLE LOOP: End the script with a connective phrase like "And so...", "Which is why...", or "And that is exactly why..." so it grammatically flows PERFECTLY back into the very first line of your Pain Point hook, creating an endless seamless loop. Do NOT say "subscribe", "save this video", or do a traditional outro.
 
-VOICE ACTING & SSML DIRECTION (CRITICAL FOR SHORTS ALGORITHM):
-- recommended_voice_model: Choose "Charon" (male) or "Aoede" (female).
-- style_instruction: "Captivating, wise, and profoundly comforting. Speak with momentum and clarity. DO NOT drag words out."
-- SSML PACING: You MUST use <prosody rate='medium' pitch='-1st'>. This keeps the voice deep and godly, but moving fast enough to prevent viewers from swiping away.
-- NO LONG PAUSES: Do NOT use 1-second breaks. The maximum break allowed is <break time='400ms'/> after the main verse.
+VOICE ACTING & EXPRESSION DIRECTION (CRITICAL FOR REALISM):
+- recommended_voice_model: Choose one of our core archetypes: "Deep_Stoic_Male", "Ethereal_Wisdom_Female", or "Calm_Storyteller_Male".
+- style_instruction: A short note on the vibe (e.g., "Warm, peaceful, and slow.")
+- EXPRESSION TAGS: Instead of robotic SSML, you MUST use natural paralinguistic tags placed directly in the `acting_text`.
+- Allowed tags: [sigh], [pause], [chuckle], [clears throat], [breath], [laugh].
+- Example: "[breath] Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us... [sigh]"
+- Keep the `clean_text` completely free of these bracketed tags.
 
 VISUALS & SFX:
 - visual_keyword: Use ultra-specific, peaceful visual prompts (e.g., "macro shot of dew on a green leaf", "slow golden hour light through forest", "calm ocean waves crashing slowly").
@@ -119,25 +121,25 @@ Return ONLY valid JSON in this format:
   "verse_source": "Epictetus, Enchiridion 1",
   "description": "Ancient wisdom for modern peace.\\n\\n#wisdom #peace #motivation #stoicism",
   "tags": ["wisdom", "peace", "shorts", "motivation", "stoicism", "calm", "healing"],
-  "recommended_voice_model": "Charon",
+  "recommended_voice_model": "Deep_Stoic_Male",
   "lines": [
     {{
       "style_instruction": "Captivating, wise, and profoundly comforting. Speak with momentum and clarity.",
-      "acting_text": "<prosody rate='medium' pitch='-1st'>Feeling crushed by things you cannot control? The Stoic philosopher Epictetus reminds us...</prosody>",
+      "acting_text": "[breath] Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us...",
       "clean_text": "Feeling crushed by things you cannot control? The Stoic philosopher Epictetus reminds us...",
       "visual_keyword": "slow clouds passing over mountain",
       "sfx_keyword": "soft wind"
     }},
     {{
       "style_instruction": "Deep resonance, authoritative.",
-      "acting_text": "<prosody rate='medium' pitch='-1st'>'Some things are in our control and others not.'</prosody> <break time='400ms'/>",
+      "acting_text": "'Some things are in our control and others not.' [pause]",
       "clean_text": "'Some things are in our control and others not.'",
       "visual_keyword": "calm ocean waves crashing slowly",
       "sfx_keyword": "singing bowl"
     }},
     {{
       "style_instruction": "Comforting and impactful, slightly faster pace.",
-      "acting_text": "<prosody rate='medium' pitch='-1st'>Your anxiety comes from carrying the weight of the entire world, instead of focusing on your own actions. When you let go of what isn't yours to carry, you find true freedom. And that is exactly why you might be...</prosody>",
+      "acting_text": "[sigh] Your anxiety comes from carrying the weight of the entire world, instead of focusing on your own actions. When you let go of what isn't yours to carry, you find true freedom. [chuckle] And that is exactly why you might be...",
       "clean_text": "Your anxiety comes from carrying the weight of the entire world, instead of focusing on your own actions. When you let go of what isn't yours to carry, you find true freedom. And that is exactly why you might be...",
       "visual_keyword": "sunlight breaking through dark clouds",
       "sfx_keyword": "wind chime"
@@ -344,6 +346,7 @@ def main_pipeline():
 
             wav_file = voice_engine.generate_acting_line(
                 acting_text=acting_input, 
+                clean_text=clean_text,
                 style_instruction=style_instruction,
                 index=i, 
                 voice_name=target_voice
