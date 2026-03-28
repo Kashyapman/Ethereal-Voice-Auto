@@ -1,6 +1,7 @@
 import os
 import wave
 import time
+import torchaudio as ta
 from google import genai
 from google.genai import types
 from pydub import AudioSegment
@@ -14,42 +15,67 @@ class VoiceEngine:
             raise ValueError("GEMINI_API_KEY environment variable not set.")
         self.client = genai.Client(api_key=self.api_key)
 
+        # Safely try to initialize Chatterbox on CPU
+        try:
+            from chatterbox.tts_turbo import ChatterboxTurboTTS
+            print("🧠 Loading Chatterbox Turbo on CPU...")
+            self.chatterbox = ChatterboxTurboTTS.from_pretrained(device="cpu")
+        except Exception as e:
+            print(f"⚠️ Chatterbox initialization failed: {e}. Will use Gemini TTS fallback.")
+            self.chatterbox = None
+
     def _ethereal_mastering(self, sound):
-        """Clean, warm, massive mastering—but optimized for Shorts retention."""
+        """Clean, warm, massive mastering—optimized for Shorts retention."""
         sound = compress_dynamic_range(sound, threshold=-15.0, ratio=4.0, attack=5.0, release=50.0)
         sound = normalize(sound, headroom=0.2) 
-        
-        # FIXED: Reduced pause from 600ms to 150ms to keep the Shorts algorithm happy. 
-        # No dead air! Keep the viewer hooked.
         silence = AudioSegment.silent(duration=150)
         sound = sound + silence
-        
         return sound
 
-    def generate_acting_line(self, acting_text, style_instruction, index, voice_name="Charon"):
+    def generate_acting_line(self, acting_text, clean_text, style_instruction, index, voice_name="Charon"):
         filename = f"temp_voice_{index}.wav"
         print(f"🎙️ Rendering [{voice_name}] | Vibe: {style_instruction}")
+
+        # ==========================================
+        # ATTEMPT 1: CHATTERBOX TURBO (Expressive)
+        # ==========================================
+        if self.chatterbox:
+            try:
+                # Note: If you ever add voice cloning .wav files, you would pass `audio_prompt_path=f"voices/{voice_name}.wav"` here
+                wav = self.chatterbox.generate(acting_text)
+                
+                temp_raw = f"temp_raw_cb_{index}.wav"
+                ta.save(temp_raw, wav, self.chatterbox.sr)
+                
+                sound = AudioSegment.from_file(temp_raw)
+                sound = self._ethereal_mastering(sound)
+                sound.export(filename, format="wav")
+                
+                if os.path.exists(temp_raw): 
+                    os.remove(temp_raw)
+                    
+                return filename
+            except Exception as e:
+                print(f"⚠️ Chatterbox failed for line {index}: {e}. Falling back to Gemini TTS.")
+
+        # ==========================================
+        # ATTEMPT 2: GEMINI TTS FALLBACK (Safe)
+        # ==========================================
+        print("🔄 Using Gemini TTS Fallback...")
+        # Map our conceptual voice names back to Gemini's prebuilt names if needed
+        gemini_voice = "Aoede" if "female" in voice_name.lower() else "Charon"
 
         config = types.GenerateContentConfig(
             response_modalities=["AUDIO"],
             speech_config=types.SpeechConfig(
                 voice_config=types.VoiceConfig(
-                    prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=voice_name)
+                    prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=gemini_voice)
                 )
             )
         )
 
-        prompt = f"""You are a captivating, celestial narrator delivering ancient wisdom. 
-
-YOUR VOCAL STYLE/EMOTION FOR THIS LINE: 
-"{style_instruction}"
-
-CRITICAL INSTRUCTIONS:
-Process the following SSML markup exactly. Speak with deep resonance, but maintain strong MOMENTUM. Do not drag your words. This is for short-form video, so pacing must be engaging and continuous to maintain viewer retention.
-
-<speak>
-{acting_text}
-</speak>"""
+        # WE USE CLEAN_TEXT HERE SO GEMINI DOESN'T READ THE [TAGS]
+        prompt = f"""You are a captivating, celestial narrator. Read this exactly, with a vibe of: {style_instruction}\n\n{clean_text}"""
 
         models_to_try = ["gemini-2.5-flash-preview-tts", "gemini-2.5-pro"]
 
