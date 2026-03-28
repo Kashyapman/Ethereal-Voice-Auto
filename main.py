@@ -100,7 +100,7 @@ STRICT HIGH-RETENTION STORYTELLING STRUCTURE:
 4. THE INVISIBLE LOOP: End the script with a connective phrase like "And so...", "Which is why...", or "And that is exactly why..." so it grammatically flows PERFECTLY back into the very first line of your Pain Point hook, creating an endless seamless loop. Do NOT say "subscribe", "save this video", or do a traditional outro.
 
 VOICE ACTING & EXPRESSION DIRECTION (CRITICAL FOR REALISM):
-- recommended_voice_model: Choose one of our core archetypes: "Deep_Stoic_Male", "Ethereal_Wisdom_Female", or "Calm_Storyteller_Male".
+- recommended_voice_model: Choose the best fit from our 9 core archetypes: "Deep_Stoic_Male", "Firm_Motivational_Female", "Upbeat_Storyteller_Male", "Ethereal_Wisdom_Female", "Calm_Parable_Male", "Wise_Elder_Male", "Gentle_Guide_Female", "Authoritative_Narrator_Male", or "Bright_Inspirational_Female".
 - style_instruction: A short note on the vibe (e.g., "Warm, peaceful, and slow.")
 - EXPRESSION TAGS: Instead of robotic SSML, you MUST use natural paralinguistic tags placed directly in the `acting_text`.
 - Allowed tags: [sigh], [pause], [chuckle], [clears throat], [breath], [laugh].
@@ -332,7 +332,7 @@ def main_pipeline():
     print(f"📁 Verse Logged: {script.get('verse_source', 'Unknown Source')}")
     print(f"🏷️ Tags: {', '.join(script['tags'][:5])}...")
     
-    target_voice = script.get("recommended_voice_model", "Charon")
+    target_voice = script.get("recommended_voice_model", "Deep_Stoic_Male")
     print(f"🎙️ AI Casted Narrator: {target_voice}")
     
     final_clips = []
