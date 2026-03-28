@@ -1,0 +1,44 @@
+name: Generate Base Voices (One-Time)
+
+# This allows you to manually trigger the workflow from the GitHub Actions tab
+on:
+  workflow_dispatch: 
+
+jobs:
+  generate_and_commit:
+    runs-on: ubuntu-latest
+    
+    # Required to allow the bot to push the new audio files to your repo
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Required Library
+        run: |
+          pip install google-genai
+
+      - name: Run Voice Generation Script
+        env:
+          # Pulls your existing secret to authenticate with Gemini
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python generate_base_voices.py
+
+      - name: Commit and Push Voice Files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Add the newly generated voices folder
+          git add voices/
+          
+          # Only commit if there are actually new files to avoid workflow errors
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: auto-generated base voice clones"
+          git push
