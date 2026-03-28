@@ -95,16 +95,16 @@ Your task is to select one powerful, uplifting verse or quote from this exact so
 
 STRICT HIGH-RETENTION STORYTELLING STRUCTURE:
 1. THE PAIN POINT HOOK: Start IMMEDIATELY with a sharp, relatable modern problem (e.g. "Feeling crushed by the weight of others' opinions?", "Constantly worrying about tomorrow?"). Get straight to the point.
-2. THE SOURCE & THE VERSE: You MUST explicitly state the source and read the actual quote. (e.g., "The ancient wisdom of the Tao Te Ching reminds us: [Quote]"). Do not skip the quote or the source!
-3. THE PROPER EXPLANATION: Provide a deep, insightful explanation of what the verse means and how it applies to the pain point mentioned in the hook. Make the viewer understand and feel the impact.
+2. THE SOURCE & THE VERSE: You MUST explicitly state the source and read the actual quote. Do not skip the quote or the source!
+3. DEEP, IMMERSIVE EXPLANATION: Do not restrict your word count. Provide a deep, thoughtful, and incredibly insightful explanation of what the verse means. Focus on natural pacing, emotion, and giving the viewer genuine comfort and wisdom.
 4. THE INVISIBLE LOOP: End the script with a connective phrase like "And so...", "Which is why...", or "And that is exactly why..." so it grammatically flows PERFECTLY back into the very first line of your Pain Point hook, creating an endless seamless loop. Do NOT say "subscribe", "save this video", or do a traditional outro.
 
 VOICE ACTING & EXPRESSION DIRECTION (CRITICAL FOR REALISM):
 - recommended_voice_model: Choose the best fit from our 9 core archetypes: "Deep_Stoic_Male", "Firm_Motivational_Female", "Upbeat_Storyteller_Male", "Ethereal_Wisdom_Female", "Calm_Parable_Male", "Wise_Elder_Male", "Gentle_Guide_Female", "Authoritative_Narrator_Male", or "Bright_Inspirational_Female".
 - style_instruction: A short note on the vibe (e.g., "Warm, peaceful, and slow.")
 - EXPRESSION TAGS: Instead of robotic SSML, you MUST use natural paralinguistic tags placed directly in the `acting_text`.
-- Allowed tags: [sigh], [pause], [chuckle], [clears throat], [laugh].
-- Example: "Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us... [sigh]"
+- Allowed tags: [sigh], [pause], [chuckle], [clears throat], [laugh], [breath].
+- Example: "[breath] Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us... [sigh]"
 - Keep the `clean_text` completely free of these bracketed tags.
 
 VISUALS & SFX:
@@ -125,24 +125,10 @@ Return ONLY valid JSON in this format:
   "lines": [
     {{
       "style_instruction": "Captivating, wise, and profoundly comforting. Speak with momentum and clarity.",
-      "acting_text": "Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us...",
+      "acting_text": "[breath] Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us...",
       "clean_text": "Feeling crushed by things you cannot control? The Stoic philosopher Epictetus reminds us...",
       "visual_keyword": "slow clouds passing over mountain",
       "sfx_keyword": "soft wind"
-    }},
-    {{
-      "style_instruction": "Deep resonance, authoritative.",
-      "acting_text": "'Some things are in our control and others not.' [pause]",
-      "clean_text": "'Some things are in our control and others not.'",
-      "visual_keyword": "calm ocean waves crashing slowly",
-      "sfx_keyword": "singing bowl"
-    }},
-    {{
-      "style_instruction": "Comforting and impactful, slightly faster pace.",
-      "acting_text": "[sigh] Your anxiety comes from carrying the weight of the entire world, instead of focusing on your own actions. When you let go of what isn't yours to carry, you find true freedom. [chuckle] And that is exactly why you might be...",
-      "clean_text": "Your anxiety comes from carrying the weight of the entire world, instead of focusing on your own actions. When you let go of what isn't yours to carry, you find true freedom. And that is exactly why you might be...",
-      "visual_keyword": "sunlight breaking through dark clouds",
-      "sfx_keyword": "wind chime"
     }}
   ]
 }}
@@ -265,6 +251,8 @@ def get_visual_clip(keyword, filename, duration):
                 f.write(requests.get(link).content)
 
             clip = VideoFileClip(filename)
+            clip = clip.without_audio() # FIXED: Prevents background Pexels noise from bleeding through
+            
             if clip.duration < duration:
                 loops = int(np.ceil(duration / clip.duration)) + 1
                 clip = clip.loop(n=loops)
