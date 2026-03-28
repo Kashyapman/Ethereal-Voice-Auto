@@ -32,17 +32,24 @@ class VoiceEngine:
         sound = sound + silence
         return sound
 
-    def generate_acting_line(self, acting_text, clean_text, style_instruction, index, voice_name="Charon"):
+    def generate_acting_line(self, acting_text, clean_text, style_instruction, index, voice_name="Deep_Stoic_Male"):
         filename = f"temp_voice_{index}.wav"
         print(f"🎙️ Rendering [{voice_name}] | Vibe: {style_instruction}")
 
         # ==========================================
-        # ATTEMPT 1: CHATTERBOX TURBO (Expressive)
+        # ATTEMPT 1: CHATTERBOX TURBO (Expressive Cloning)
         # ==========================================
         if self.chatterbox:
             try:
-                # Note: If you ever add voice cloning .wav files, you would pass `audio_prompt_path=f"voices/{voice_name}.wav"` here
-                wav = self.chatterbox.generate(acting_text)
+                # 1. Point to the specific cloned voice file based on the script's recommendation
+                voice_path = f"voices/{voice_name}.wav"
+                
+                # 2. Check if the file exists to prevent crashes
+                if os.path.exists(voice_path):
+                    wav = self.chatterbox.generate(acting_text, audio_prompt_path=voice_path)
+                else:
+                    print(f"⚠️ Warning: {voice_path} not found. Using default base voice.")
+                    wav = self.chatterbox.generate(acting_text)
                 
                 temp_raw = f"temp_raw_cb_{index}.wav"
                 ta.save(temp_raw, wav, self.chatterbox.sr)
@@ -62,8 +69,21 @@ class VoiceEngine:
         # ATTEMPT 2: GEMINI TTS FALLBACK (Safe)
         # ==========================================
         print("🔄 Using Gemini TTS Fallback...")
-        # Map our conceptual voice names back to Gemini's prebuilt names if needed
-        gemini_voice = "Aoede" if "female" in voice_name.lower() else "Charon"
+        
+        # Exact mapping back to Gemini prebuilt voices for perfect fallbacks
+        fallback_map = {
+            "Deep_Stoic_Male": "Charon",
+            "Firm_Motivational_Female": "Kore",
+            "Upbeat_Storyteller_Male": "Puck",
+            "Ethereal_Wisdom_Female": "Aoede",
+            "Calm_Parable_Male": "Fenrir",
+            "Wise_Elder_Male": "Umbriel",
+            "Gentle_Guide_Female": "Vindemiatrix",
+            "Authoritative_Narrator_Male": "Zubenelgenubi",
+            "Bright_Inspirational_Female": "Zephyr"
+        }
+        
+        gemini_voice = fallback_map.get(voice_name, "Charon")
 
         config = types.GenerateContentConfig(
             response_modalities=["AUDIO"],
@@ -74,7 +94,6 @@ class VoiceEngine:
             )
         )
 
-        # WE USE CLEAN_TEXT HERE SO GEMINI DOESN'T READ THE [TAGS]
         prompt = f"""You are a captivating, celestial narrator. Read this exactly, with a vibe of: {style_instruction}\n\n{clean_text}"""
 
         models_to_try = ["gemini-2.5-flash-preview-tts", "gemini-2.5-pro"]
