@@ -103,8 +103,8 @@ VOICE ACTING & EXPRESSION DIRECTION (CRITICAL FOR REALISM):
 - recommended_voice_model: Choose the best fit from our 9 core archetypes: "Deep_Stoic_Male", "Firm_Motivational_Female", "Upbeat_Storyteller_Male", "Ethereal_Wisdom_Female", "Calm_Parable_Male", "Wise_Elder_Male", "Gentle_Guide_Female", "Authoritative_Narrator_Male", or "Bright_Inspirational_Female".
 - style_instruction: A short note on the vibe (e.g., "Warm, peaceful, and slow.")
 - EXPRESSION TAGS: Instead of robotic SSML, you MUST use natural paralinguistic tags placed directly in the `acting_text`.
-- Allowed tags: [sigh], [pause], [chuckle], [clears throat], [breath], [laugh].
-- Example: "[breath] Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us... [sigh]"
+- Allowed tags: [sigh], [pause], [chuckle], [clears throat], [laugh].
+- Example: "Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us... [sigh]"
 - Keep the `clean_text` completely free of these bracketed tags.
 
 VISUALS & SFX:
@@ -112,7 +112,7 @@ VISUALS & SFX:
 - sfx_keyword: Choose subtle sounds from Pixabay (e.g., "wind chime", "soft wind", "singing bowl").
 
 YOUTUBE SEO:
-- title: Under 50 chars, uplifting. End with #shorts #wisdom.
+- title: An uplifting, highly engaging title. End with #shorts #wisdom.
 - verse_source: The EXACT book and verse (e.g., "Tao Te Ching Chapter 8") so we can log it and never repeat it.
 
 Return ONLY valid JSON in this format:
@@ -125,7 +125,7 @@ Return ONLY valid JSON in this format:
   "lines": [
     {{
       "style_instruction": "Captivating, wise, and profoundly comforting. Speak with momentum and clarity.",
-      "acting_text": "[breath] Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us...",
+      "acting_text": "Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us...",
       "clean_text": "Feeling crushed by things you cannot control? The Stoic philosopher Epictetus reminds us...",
       "visual_keyword": "slow clouds passing over mountain",
       "sfx_keyword": "soft wind"
@@ -365,10 +365,11 @@ def main_pipeline():
             clip = clip.fx(colorx, 0.95).set_audio(audio_clip)
 
             if i > 0:
+                # FIXED: This forces the clips to play sequentially, preventing the 7-second cutoff!
+                clip = clip.set_start(final_clips[-1].end)
+                
                 if random.random() < 0.3:
                     clip = clip.fadein(0.5, color=[255,255,255]) 
-                else:
-                    clip = clip.set_start(final_clips[-1].end)
             
             final_clips.append(clip)
 
