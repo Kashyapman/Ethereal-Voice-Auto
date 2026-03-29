@@ -102,10 +102,13 @@ STRICT HIGH-RETENTION STORYTELLING STRUCTURE:
 VOICE ACTING & EXPRESSION DIRECTION (CRITICAL FOR REALISM):
 - recommended_voice_model: Choose the best fit from our 9 core archetypes: "Deep_Stoic_Male", "Firm_Motivational_Female", "Upbeat_Storyteller_Male", "Ethereal_Wisdom_Female", "Calm_Parable_Male", "Wise_Elder_Male", "Gentle_Guide_Female", "Authoritative_Narrator_Male", or "Bright_Inspirational_Female".
 - style_instruction: A short note on the vibe (e.g., "Warm, peaceful, and slow.")
-- EXPRESSION TAGS: Instead of robotic SSML, you MUST use natural paralinguistic tags placed directly in the `acting_text`.
-- Allowed tags: [sigh], [pause], [chuckle], [clears throat], [laugh], [breath].
-- Example: "[breath] Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us... [sigh]"
-- Keep the `clean_text` completely free of these bracketed tags.
+- EXPRESSION TAGS (SSML): You MUST use highly detailed, rich SSML tags inside `acting_text` to force the AI Voice Actor to pace itself perfectly. Philosophical content requires thoughtful, pregnant pauses and pacing shifts.
+- Allowed tags: 
+  - <break time="0.5s"/> to <break time="1.5s"/> for contemplative pauses.
+  - <emphasis level="strong"> for profound words.
+  - <prosody rate="slow" pitch="low"> for deep, grounding wisdom.
+- Example: "Feeling crushed by things you cannot control? <break time='1.0s'/> The Stoic philosopher Epictetus reminds us... <break time='0.8s'/>"
+- Keep the `clean_text` completely free of these XML tags.
 
 VISUALS & SFX:
 - visual_keyword: Use ultra-specific, peaceful visual prompts (e.g., "macro shot of dew on a green leaf", "slow golden hour light through forest", "calm ocean waves crashing slowly").
@@ -125,7 +128,7 @@ Return ONLY valid JSON in this format:
   "lines": [
     {{
       "style_instruction": "Captivating, wise, and profoundly comforting. Speak with momentum and clarity.",
-      "acting_text": "[breath] Feeling crushed by things you cannot control? [pause] The Stoic philosopher Epictetus reminds us...",
+      "acting_text": "Feeling crushed by things you cannot control? <break time='1.0s'/> The Stoic philosopher Epictetus reminds us...",
       "clean_text": "Feeling crushed by things you cannot control? The Stoic philosopher Epictetus reminds us...",
       "visual_keyword": "slow clouds passing over mountain",
       "sfx_keyword": "soft wind"
@@ -251,7 +254,7 @@ def get_visual_clip(keyword, filename, duration):
                 f.write(requests.get(link).content)
 
             clip = VideoFileClip(filename)
-            clip = clip.without_audio() # FIXED: Prevents background Pexels noise from bleeding through
+            clip = clip.without_audio() # Prevents background Pexels noise from bleeding through
             
             if clip.duration < duration:
                 loops = int(np.ceil(duration / clip.duration)) + 1
@@ -353,7 +356,7 @@ def main_pipeline():
             clip = clip.fx(colorx, 0.95).set_audio(audio_clip)
 
             if i > 0:
-                # FIXED: This forces the clips to play sequentially, preventing the 7-second cutoff!
+                # Forces the clips to play sequentially
                 clip = clip.set_start(final_clips[-1].end)
                 
                 if random.random() < 0.3:
