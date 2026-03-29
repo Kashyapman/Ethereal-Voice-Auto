@@ -31,7 +31,6 @@ jobs:
 
       - name: Install Python Libraries
         run: |
-          pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
           pip install -r requirements.txt
 
       - name: Run Ethereal Bot
