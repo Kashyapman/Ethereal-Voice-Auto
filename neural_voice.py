@@ -1,6 +1,7 @@
 import os
 import wave
 import time
+import random
 
 from google import genai
 from google.genai import types
@@ -27,11 +28,19 @@ class VoiceEngine:
             release=50.0,
         )
         sound = normalize(sound, headroom=0.2)
-        silence = AudioSegment.silent(duration=150)
-        sound = sound + silence
         return sound
 
-    def generate_acting_line(self, acting_text, clean_text, style_instruction, index, voice_name="Deep_Stoic_Male"):
+    def generate_acting_line(
+        self,
+        acting_text,
+        clean_text,
+        style_instruction,
+        index,
+        voice_name="Deep_Stoic_Male",
+        pre_silence_ms=0,
+        post_silence_ms=120,
+        human_touch=False,
+    ):
         filename = f"temp_voice_{index}.wav"
         print(f"🎙️ Gemini Rendering [{voice_name}] | Vibe: {style_instruction}")
 
@@ -58,21 +67,28 @@ class VoiceEngine:
             ),
         )
 
-        prompt = f"""You are a captivating, celestial narrator recording an uplifting, philosophical video.
+        # Small controlled timing variation keeps the delivery human without becoming sloppy.
+        if human_touch:
+            pre_silence_ms = max(0, pre_silence_ms + random.randint(0, 35))
+            post_silence_ms = max(0, post_silence_ms + random.randint(0, 55))
 
+        prompt = f"""You are a captivating, celestial narrator recording an uplifting, philosophical video.
 YOUR VOCAL STYLE/EMOTION FOR THIS LINE: "{style_instruction}"
 
 CRITICAL ACTING DIRECTION:
-- Do NOT speak SSML tags out loud.
-- Execute them naturally as pacing and silence instructions.
-- Keep the delivery emotionally human, not robotic.
-- Use tiny breath-like pauses only where punctuation or breaks appear.
-- Never add filler words unless they are already written.
-- Do not over-dramatize every sentence. Let important words land.
-- For deep wisdom, allow controlled softness and a slight human imperfection in pacing, but never sloppy speech.
-
 The script below uses SSML tags (like <break>, <emphasis>, <prosody>).
-When you see them, treat them as stage directions:
+DO NOT speak the tags out loud. Instead, you MUST execute them perfectly as stage directions:
+- When you see <break time="Xs"/>, pause in complete silence for that exact duration.
+- When you see <emphasis level="strong">, hit that word with gentle but firm conviction.
+- When you see <prosody rate="slow" pitch="low">, slow down to emphasize profound depth.
+
+Rules for delivery:
+- Keep it natural, not robotic.
+- If the line feels emotional, allow a tiny human breath in the pacing.
+- If the line is a quote, give it weight.
+- If the line is a takeaway, make it sound grounded and useful.
+
+Bring this peaceful script to life exactly as written:
 
 {acting_text}
 """
@@ -107,6 +123,16 @@ When you see them, treat them as stage directions:
 
                     sound = AudioSegment.from_file(temp_raw)
                     sound = self._ethereal_mastering(sound)
+
+                    if pre_silence_ms > 0:
+                        sound = AudioSegment.silent(duration=pre_silence_ms) + sound
+                    if post_silence_ms > 0:
+                        sound = sound + AudioSegment.silent(duration=post_silence_ms)
+
+                    # Very light natural shaping.
+                    if human_touch:
+                        sound = sound.fade_in(10).fade_out(20)
+
                     sound.export(filename, format="wav")
 
                     if os.path.exists(temp_raw):
