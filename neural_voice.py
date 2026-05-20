@@ -59,20 +59,22 @@ class VoiceEngine:
         )
 
         prompt = f"""You are a captivating, celestial narrator recording an uplifting, philosophical video.
+
 YOUR VOCAL STYLE/EMOTION FOR THIS LINE: "{style_instruction}"
 
 CRITICAL ACTING DIRECTION:
-The script below uses SSML tags (like <break>, <emphasis>, <prosody>).
-DO NOT speak the tags out loud. Instead, you MUST execute them perfectly as stage directions:
-- When you see <break time="Xs"/>, pause in complete silence for that exact duration.
-- When you see <emphasis level="strong">, hit that word with gentle but firm conviction.
-- When you see <prosody rate="slow" pitch="low">, slow down to emphasize profound depth.
+- Do NOT speak SSML tags out loud.
+- Execute them naturally as pacing and silence instructions.
+- Keep the delivery emotionally human, not robotic.
+- Use tiny breath-like pauses only where punctuation or breaks appear.
+- Never add filler words unless they are already written.
+- Do not over-dramatize every sentence. Let important words land.
+- For deep wisdom, allow controlled softness and a slight human imperfection in pacing, but never sloppy speech.
 
-Bring this peaceful script to life exactly as written:
+The script below uses SSML tags (like <break>, <emphasis>, <prosody>).
+When you see them, treat them as stage directions:
 
 {acting_text}
-
-If the script contains punctuation that suggests a pause, honor it naturally.
 """
 
         models_to_try = ["gemini-2.5-flash-preview-tts", "gemini-2.5-pro"]
