@@ -1,62 +1,85 @@
 import os
-import wave
 import time
+import wave
 import random
-
 from google import genai
 from google.genai import types
-
 from pydub import AudioSegment
 from pydub.effects import compress_dynamic_range, normalize
+
+# ============================================================
+# ETHEREAL VOICE MAP & ROLE DIRECTIVES
+# ============================================================
+GEMINI_WISDOM_VOICES = {
+    "Deep_Stoic_Male": "Charon",
+    "Firm_Motivational_Female": "Kore",
+    "Upbeat_Storyteller_Male": "Puck",
+    "Ethereal_Wisdom_Female": "Aoede",
+    "Calm_Parable_Male": "Fenrir",
+    "Wise_Elder_Male": "Umbriel",
+    "Gentle_Guide_Female": "Vindemiatrix",
+    "Authoritative_Narrator_Male": "Zubenelgenubi",
+    "Bright_Inspirational_Female": "Zephyr",
+}
+
+WISDOM_ROLE_PROMPTS = {
+    "Deep_Stoic_Male": (
+        "You are a timeless Stoic philosopher and elder mentor. Your voice is deep, "
+        "grounded, quiet, and resonant, carrying unflinching strength and peace."
+    ),
+    "Ethereal_Wisdom_Female": (
+        "You are a serene, compassionate celestial guide. Your voice is soft, warm, "
+        "atmospheric, and comforting, delivering profound spiritual truth."
+    ),
+    "Wise_Elder_Male": (
+        "You are an ancient scholar reading sacred scriptures. Your vocal delivery is "
+        "reverent, slow, heavy with conviction, and deeply authoritative."
+    ),
+    "Gentle_Guide_Female": (
+        "You are a calm meditation master speaking to someone who is hurting. Your tone is "
+        "gentle, patient, breathy, and emotionally steady."
+    )
+}
 
 
 class VoiceEngine:
     def __init__(self):
-        print("🎚️ Initializing Gemini Master-Director Engine (Ethereal)...")
+        print("🎚️ Initializing Gemini Ethereal Master-Director Engine v3.7...")
         self.api_key = os.environ.get("GEMINI_API_KEY")
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY environment variable not set.")
         self.client = genai.Client(api_key=self.api_key)
 
-    def _ethereal_mastering(self, sound):
-        """Clean, warm, massive mastering—optimized for Shorts retention."""
+    def _ethereal_mastering(self, sound: AudioSegment) -> AudioSegment:
+        """Clean, warm, massive mastering optimized for spiritual clarity."""
+        sound = sound.high_pass_filter(70)
+        sound = sound.low_pass_filter(13000)
         sound = compress_dynamic_range(
             sound,
             threshold=-15.0,
-            ratio=4.0,
-            attack=5.0,
-            release=50.0,
+            ratio=3.8,
+            attack=6.0,
+            release=55.0,
         )
         sound = normalize(sound, headroom=0.2)
         return sound
 
     def generate_acting_line(
         self,
-        acting_text,
-        clean_text,
-        style_instruction,
-        index,
-        voice_name="Deep_Stoic_Male",
-        pre_silence_ms=0,
-        post_silence_ms=120,
-        human_touch=False,
-    ):
+        acting_text: str,
+        clean_text: str,
+        style_instruction: str,
+        index: int,
+        voice_name: str = "Deep_Stoic_Male",
+        pre_silence_ms: int = 0,
+        post_silence_ms: int = 120,
+        human_touch: bool = False,
+    ) -> str | None:
         filename = f"temp_voice_{index}.wav"
-        print(f"🎙️ Gemini Rendering [{voice_name}] | Vibe: {style_instruction}")
+        gemini_voice = GEMINI_WISDOM_VOICES.get(voice_name, "Charon")
+        role_directive = WISDOM_ROLE_PROMPTS.get(voice_name, WISDOM_ROLE_PROMPTS["Deep_Stoic_Male"])
 
-        fallback_map = {
-            "Deep_Stoic_Male": "Charon",
-            "Firm_Motivational_Female": "Kore",
-            "Upbeat_Storyteller_Male": "Puck",
-            "Ethereal_Wisdom_Female": "Aoede",
-            "Calm_Parable_Male": "Fenrir",
-            "Wise_Elder_Male": "Umbriel",
-            "Gentle_Guide_Female": "Vindemiatrix",
-            "Authoritative_Narrator_Male": "Zubenelgenubi",
-            "Bright_Inspirational_Female": "Zephyr",
-        }
-
-        gemini_voice = fallback_map.get(voice_name, "Charon")
+        print(f"🎙️ Gemini Studio TTS [{gemini_voice} | Persona: {voice_name}] | Style: {style_instruction[:35]}...")
 
         config = types.GenerateContentConfig(
             response_modalities=["AUDIO"],
@@ -67,31 +90,21 @@ class VoiceEngine:
             ),
         )
 
-        # Small controlled timing variation keeps the delivery human without becoming sloppy.
         if human_touch:
-            pre_silence_ms = max(0, pre_silence_ms + random.randint(0, 35))
-            post_silence_ms = max(0, post_silence_ms + random.randint(0, 55))
+            pre_silence_ms = max(0, pre_silence_ms + random.randint(0, 30))
+            post_silence_ms = max(0, post_silence_ms + random.randint(0, 45))
 
-        prompt = f"""You are a captivating, celestial narrator recording an uplifting, philosophical video.
-YOUR VOCAL STYLE/EMOTION FOR THIS LINE: "{style_instruction}"
+        prompt = f"""{role_directive}
 
-CRITICAL ACTING DIRECTION:
-The script below uses SSML tags (like <break>, <emphasis>, <prosody>).
-DO NOT speak the tags out loud. Instead, you MUST execute them perfectly as stage directions:
-- When you see <break time="Xs"/>, pause in complete silence for that exact duration.
-- When you see <emphasis level="strong">, hit that word with gentle but firm conviction.
-- When you see <prosody rate="slow" pitch="low">, slow down to emphasize profound depth.
+YOUR SPECIFIC VOCAL STYLE FOR THIS EXACT LINE: "{style_instruction}"
 
-Rules for delivery:
-- Keep it natural, not robotic.
-- If the line feels emotional, allow a tiny human breath in the pacing.
-- If the line is a quote, give it weight.
-- If the line is a takeaway, make it sound grounded and useful.
+PERFORMANCE INSTRUCTIONS:
+1. Execute SSML tags (pauses, emphasis, rate shifts) as natural stage directions.
+2. DO NOT speak SSML tags, prompt directions, or stage brackets out loud.
+3. Keep the pacing measured, intentional, and spiritually resonant.
 
-Bring this peaceful script to life exactly as written:
-
-{acting_text}
-"""
+SCRIPT:
+{acting_text}"""
 
         models_to_try = ["gemini-2.5-flash-preview-tts", "gemini-2.5-pro"]
 
@@ -129,9 +142,8 @@ Bring this peaceful script to life exactly as written:
                     if post_silence_ms > 0:
                         sound = sound + AudioSegment.silent(duration=post_silence_ms)
 
-                    # Very light natural shaping.
                     if human_touch:
-                        sound = sound.fade_in(10).fade_out(20)
+                        sound = sound.fade_in(8).fade_out(15)
 
                     sound.export(filename, format="wav")
 
@@ -142,7 +154,7 @@ Bring this peaceful script to life exactly as written:
 
                 except Exception as e:
                     if "429" in str(e) or "503" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
-                        time.sleep(35 + (attempt * 10))
+                        time.sleep(15 + (attempt * 10))
                     else:
                         break
 
